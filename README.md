@@ -9,10 +9,10 @@ Fsck happens based on either the time (180 days after creation) or number of mou
 It was designed to read in a comma seperated file and refine/highlight which are set for fsck.  The data it reviews should be in this format:
 hostname,filesystem,fstype,size,mountcount,maxmounts,interval,checkafterdate
 
-In order to get the data, the following command was executed on all the hosts and consolidated into a file:
+In order to get the data, the following command was executed (as root/sudo) on all the hosts and consolidated into a file:
 
 ```
-for i in $(df -PlT -B 1M -t ext2 -t ext3 -t ext4 | grep -v Filesystem | awk '{OFS=","; print $1,$2,$3}'); do echo ${i},$(tune2fs -l ${i%%,*} | awk -F ": +" '/ount count|Check interval|Next check after/ {ORS=",";gsub(/ \(.*\)/, "", $2);print $2}'); done
+for i in $(df -PlT -B 1M -t ext2 -t ext3 -t ext4 | grep -v Filesystem | awk '{OFS=","; print $1,$2,$3}'); do echo $HOSTNAME,${i},$(tune2fs -l ${i%%,*} | awk -F ": +" '/ount count|Check interval|Next check after/ {ORS=",";gsub(/ \(.*\)/, "", $2);print $2}'); done
 ```
 
 NOTE: I need to update it because I was using a hard coded MAINTENANCE_DAY = "Sun Jan 17 23:01:02 2016", but should probably make the MAINTENANCE_DAY = current date/time so manual changes to realcheck2.py aren't needed for future runs.
